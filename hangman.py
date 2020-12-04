@@ -9,22 +9,18 @@ import string
 from enum import Enum
 
 WORDLIST_FILENAME = "words.txt"
-VOWELS_LIST = {"a","e","i","o","u"}
 INITIAL_GUESSES = 6
 ININITAL_WARNINGS = 3
 INITIAL_HINT_ATTEMPTS = 1
-HINT_SYMBOL = "*"
-GAP_SYMBOL = "_"
-
 
 class BaseVariables():
     """
     This class creates an object with base variables.
     It also has constants inside of it.
     """
-    vowels = VOWELS_LIST
-    hint = HINT_SYMBOL
-    gap = GAP_SYMBOL+" "
+    VOWELS = {"a","e","i","o","u"}
+    HINT_SYMBOL = "*"
+    UNREVEALED_LETTER = "_"
     def __init__(self, secret_word, type_of_game):
         self.guesses_remaining = INITIAL_GUESSES
         self.warnings_remaining = ININITAL_WARNINGS
@@ -105,7 +101,6 @@ def get_guessed_word(secret_word, letters_guessed):
     This function returns word with underscore symbols.
     secret_word: string, the word the user is guessing
     letters_guessed: set of letters which has been guessed so far
-    gap: string, how unguessed letters shold look like
     returns: string, comprised of letters, underscores (_), and spaces that represents
       which letters in secret_word have been guessed so far.
     """
@@ -114,7 +109,7 @@ def get_guessed_word(secret_word, letters_guessed):
     new_word = []
     for letter in secret_word:
         if letter in check:
-            new_word.append(BaseVariables.gap)
+            new_word.append(BaseVariables.UNREVEALED_LETTER + " ")
         else:   
             new_word.append(letter)
     return "".join(new_word).strip()
@@ -169,7 +164,7 @@ def guess_try(guess, variables):
                                variables.letters_guessed))
     else:
         # if letter is vowel -2 guesses
-        if guess in BaseVariables.vowels:
+        if guess in BaseVariables.VOWELS:
             variables.guesses_remaining -= 2
         # if letter is not vowel -1 guess
         else:
@@ -192,7 +187,7 @@ def match_with_gaps(my_word, other_word, letters_guessed):
     """
     if len(my_word) == len(other_word):
         for i in range(len(my_word)):
-            if my_word[i] == BaseVariables.gap.strip():
+            if my_word[i] == BaseVariables.UNREVEALED_LETTER:
                 if other_word[i] in letters_guessed:
                     return False
                 continue
@@ -242,12 +237,12 @@ def display(output, variables):
     if variables.warnings_remaining <= 0:
         variables.guesses_remaining -= 1
         print(
-              "You have no warnings left so you lose one guess:" +
+              "You have no warnings left so you lose one guess: " +
                get_guessed_word(variables.secret_word,
                                variables.letters_guessed))
         return variables
     print(
-         f"You have {variables.warnings_remaining} warnings left:\n" +
+         f"You have {variables.warnings_remaining} warnings left: " +
          get_guessed_word(variables.secret_word,
                                variables.letters_guessed))
     return variables
@@ -299,6 +294,8 @@ def game_restart():
             print("Please enter y/n.")
         else:
             valid = True
+    if stop == "n":
+        print()
     return stop
 
 
@@ -310,8 +307,8 @@ def type_of_game_input():
     valid = False
     while not valid:
         type_of_game = input(
-                         "Enter 1, if you want to play hangman with hints\n"+
-                         "Enter 0, if you want to play hangman without hints\n"+
+                         "Enter 1, if you want to play hangman with hints\n" +
+                         "Enter 0, if you want to play hangman without hints\n" +
                          ">>>> "
                             )
         if type_of_game not in {"1", "0"}:
@@ -354,7 +351,7 @@ def hangman_combined(variables):
     print("Available letters:", get_available_letters(variables.letters_guessed))
     # Used strip in case that user accidently inputs space
     guess = input("Please guess a letter: ").strip()
-    if guess == BaseVariables.hint and\
+    if guess == BaseVariables.HINT_SYMBOL and\
                 variables.type_of_game == TypeOfGame.HANGMAN_WITH_HINTS:
         show_possible_matches(variables, 
                               get_guessed_word(variables.secret_word,
@@ -362,7 +359,7 @@ def hangman_combined(variables):
         print(get_guessed_word(variables.secret_word,
                                variables.letters_guessed))
         return variables
-    elif guess == BaseVariables.hint and variables.hint_attempts > 0:
+    elif guess == BaseVariables.HINT_SYMBOL and variables.hint_attempts > 0:
         print("You play hangman without hints.")
         variables.hint_attempts -= 1
         return variables
