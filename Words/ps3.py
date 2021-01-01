@@ -423,7 +423,7 @@ def play_game(word_list):
             if answer == "yes":
                 score_last = play_hand(hand, word_list)
                 print(f"Total score for this hand: {score_last} points\n" + "----------")
-                substitute_not_used = False
+                replay_not_used = False
         score += score_last
     else:
         print(f"Total score over all hands: {score}")
